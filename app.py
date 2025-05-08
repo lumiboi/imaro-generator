@@ -31,6 +31,5 @@ if __name__ == "__main__":
     os.makedirs("static/uploads", exist_ok=True)
     os.makedirs("static/results", exist_ok=True)
 
-    # Railway'e uygun şekilde host ve port ayarı
     port = int(os.environ.get("PORT", 5000))
     app.run(host="0.0.0.0", port=port)
