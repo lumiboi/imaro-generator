@@ -4,43 +4,38 @@
     <meta charset="UTF-8">
     <title>Imaro Generator</title>
     <style>
-        body { font-family: Arial, sans-serif; text-align: center; }
-        input, button { margin: 10px; padding: 8px; }
-        img { max-width: 300px; margin-top: 20px; }
+        body {
+            font-family: Arial, sans-serif;
+            text-align: center;
+            margin-top: 50px;
+        }
+        input, button {
+            margin: 10px;
+            padding: 8px;
+            font-size: 16px;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
     </style>
 </head>
 <body>
     <h1>Imaro Generator</h1>
-    <input type="text" id="username" placeholder="X Kullanıcı Adı">
-    <button onclick="generate()">Oluştur</button>
-    <div><img id="result" src="" alt=""></div>
-
-    <script>
-        async function generate() {
-            const username = document.getElementById("username").value;
-            if (!username) {
-                alert("Lütfen bir kullanıcı adı girin!");
-                return;
-            }
-
-            try {
-                const response = await fetch("/generate", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ username })
-                });
-
-                const data = await response.json();
-                if (data.detail) {
-                    alert(data.detail);
-                    return;
-                }
-
-                document.getElementById("result").src = data.image;
-            } catch (error) {
-                alert("Bir hata oluştu: " + error.message);
-            }
-        }
-    </script>
+    <form method="POST" action="/generate">
+        <input type="text" name="username" placeholder="X Kullanıcı Adı" required>
+        <button type="submit">Oluştur</button>
+    </form>
+    {% if error %}
+        <p style="color: red;">{{ error }}</p>
+    {% endif %}
+    {% if image %}
+        <img src="{{ image }}" alt="Harmanlanmış Fotoğraf" style="max-width: 300px; margin-top: 20px;">
+    {% endif %}
 </body>
 </html>
