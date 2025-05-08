@@ -1,10 +1,11 @@
 import os
 import requests
-from flask import Flask, render_template, request
+from flask import Flask, render_template, request, send_file
 from PIL import Image
 import numpy as np
 import tensorflow as tf
 from tensorflow.keras.preprocessing import image as keras_image
+from io import BytesIO
 
 app = Flask(__name__)
 
@@ -14,7 +15,7 @@ def get_twitter_profile_picture(username):
     return f"https://pbs.twimg.com/profile_images/{username}/profile_image.jpg"
 
 # Stil Transferi Fonksiyonu
-def style_transfer(content_image_path, style_image_path, output_image_path):
+def style_transfer(content_image_path, style_image_path):
     # Stil transferi için TensorFlow kullanımı
     content_image = keras_image.load_img(content_image_path)
     style_image = keras_image.load_img(style_image_path)
@@ -28,14 +29,16 @@ def style_transfer(content_image_path, style_image_path, output_image_path):
     style_image = tf.image.resize(style_image, (512, 512))
 
     # Modeli yükle ve stil transferini gerçekleştir
-    # Bu örnekte, yerleşik bir stil transfer modeli kullanıyoruz
     model = tf.saved_model.load("style_transfer_model")
 
     stylized_image = model(content_image, style_image)
 
-    # Sonucu kaydet
-    output_image = Image.fromarray(np.uint8(stylized_image.numpy()))
-    output_image.save(output_image_path)
+    # Sonucu bellek üzerinde tutmak için BytesIO kullanıyoruz
+    img = Image.fromarray(np.uint8(stylized_image.numpy()))
+    img_byte_arr = BytesIO()
+    img.save(img_byte_arr, format='PNG')
+    img_byte_arr.seek(0)  # Başlangıca getir
+    return img_byte_arr
 
 # Ana sayfa
 @app.route('/', methods=['GET', 'POST'])
@@ -50,10 +53,11 @@ def index():
             with open('user_image.jpg', 'wb') as file:
                 file.write(response.content)
 
-            # Stil transferini yap
-            style_transfer('user_image.jpg', 'style_image.jpg', 'output_image.jpg')
+            # Stil transferini yap ve sonucu belleğe al
+            img_byte_arr = style_transfer('user_image.jpg', 'style_image.jpg')
 
-            return render_template('index.html', output_image_url='/static/output_image.jpg')
+            # Çıktıyı tarayıcıya gönder
+            return send_file(img_byte_arr, mimetype='image/png')
 
         else:
             error_message = "Profil fotoğrafı bulunamadı! Lütfen geçerli bir kullanıcı adı girin."
