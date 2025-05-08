@@ -1,6 +1,5 @@
-flask
-deepface
-opencv-python-headless
-pillow
-requests
-gunicorn
+Flask==2.2.3
+requests==2.28.1
+Pillow==9.1.1
+tensorflow==2.11.0
+numpy==1.23.5
