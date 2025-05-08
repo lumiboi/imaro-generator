@@ -1,6 +1,6 @@
-fastapi
-uvicorn
+flask
 deepface
-opencv-python
+opencv-python-headless
 pillow
 requests
+gunicorn
